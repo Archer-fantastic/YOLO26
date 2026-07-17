@@ -1,5 +1,5 @@
 """
-修复 YOLO 标签文件：将纯 bbox 格式（无 polygon）转为带 polygon 的分割格式
+修复 YOLO 标签文件：将纯 bbox 格式（无 polygon）转为带 polygon 的分割格式.
 
 问题背景：
 YOLO 分割训练在 verify_image_label 中，如果某个 label 文件所有行都没有 polygon
@@ -18,14 +18,13 @@ YOLO 分割训练在 verify_image_label 中，如果某个 label 文件所有行
   python mytools/fix_bbox_to_polygon.py datasets/五里洋_yolo_dataset
 """
 
-import os
 import argparse
 import shutil
 from pathlib import Path
 
 
 def bbox_to_polygon(line: str):
-    """将 bbox 行 (class cx cy w h) 转为带 4 角点 polygon 的行"""
+    """将 bbox 行 (class cx cy w h) 转为带 4 角点 polygon 的行."""
     parts = line.strip().split()
     if len(parts) < 5:
         return None  # 格式异常
@@ -43,13 +42,13 @@ def bbox_to_polygon(line: str):
 
 
 def is_bbox_only_line(line: str):
-    """判断是否为纯 bbox 行（3~5 个 token，无 polygon）"""
+    """判断是否为纯 bbox 行（3~5 个 token，无 polygon）."""
     parts = line.strip().split()
     return 3 <= len(parts) <= 5
 
 
 def has_polygon_line(lines):
-    """判断列表中是否至少有一行包含 polygon（>6 个 token）"""
+    """判断列表中是否至少有一行包含 polygon（>6 个 token）."""
     for line in lines:
         if len(line.strip().split()) > 6:
             return True
@@ -57,13 +56,12 @@ def has_polygon_line(lines):
 
 
 def fix_label_dir(label_dir: str, backup: bool = True, fix_mixed: bool = False):
-    """
-    修复一个 label 目录下的所有 .txt 文件
+    """修复一个 label 目录下的所有 .txt 文件.
 
     Args:
-        label_dir:  label 子目录路径
-        backup:     是否备份原始文件（后缀 .bak）
-        fix_mixed:  是否也修复混合文件中的 bbox-only 行
+        label_dir: label 子目录路径
+        backup: 是否备份原始文件（后缀 .bak）
+        fix_mixed: 是否也修复混合文件中的 bbox-only 行
     """
     label_path = Path(label_dir)
     if not label_path.exists():
@@ -77,7 +75,7 @@ def fix_label_dir(label_dir: str, backup: bool = True, fix_mixed: bool = False):
     total_fixed_lines = 0
 
     for txt_file in txt_files:
-        with open(txt_file, 'r', encoding='utf-8') as f:
+        with open(txt_file, encoding="utf-8") as f:
             lines = [line.strip() for line in f if line.strip()]
 
         if not lines:
@@ -116,15 +114,15 @@ def fix_label_dir(label_dir: str, backup: bool = True, fix_mixed: bool = False):
                 backup_path = txt_file.with_suffix(".txt.bak")
                 shutil.copy2(txt_file, backup_path)
 
-            with open(txt_file, 'w', encoding='utf-8') as f:
-                f.write('\n'.join(fixed_lines) + '\n')
+            with open(txt_file, "w", encoding="utf-8") as f:
+                f.write("\n".join(fixed_lines) + "\n")
 
     print(f"  纯 bbox 文件（已全部转为 polygon）: {pure_bbox_files}")
     print(f"  修复行数: {total_fixed_lines}")
 
 
 def delete_cache(label_dirs: list):
-    """删除 label 缓存文件（*.cache），强制重建"""
+    """删除 label 缓存文件（*.cache），强制重建."""
     for d in label_dirs:
         label_path = Path(d)
         for pattern in ["train.cache", "val.cache", "test.cache", "labels.cache"]:
@@ -135,29 +133,14 @@ def delete_cache(label_dirs: list):
 
 
 def main():
-    parser = argparse.ArgumentParser(
-        description="修复 YOLO 分割数据集：将纯 bbox 标注转为带 polygon 的格式"
-    )
+    parser = argparse.ArgumentParser(description="修复 YOLO 分割数据集：将纯 bbox 标注转为带 polygon 的格式")
+    parser.add_argument("dataset_dir", type=str, help="数据集根目录（包含 labels/train、labels/val 等子目录）")
+    parser.add_argument("--no-backup", action="store_true", help="不备份原始文件")
     parser.add_argument(
-        "dataset_dir", type=str,
-        help="数据集根目录（包含 labels/train、labels/val 等子目录）"
+        "--fix-mixed", action="store_true", help="也修复混合文件（有 polygon 也有 bbox）中的 bbox-only 行"
     )
-    parser.add_argument(
-        "--no-backup", action="store_true",
-        help="不备份原始文件"
-    )
-    parser.add_argument(
-        "--fix-mixed", action="store_true",
-        help="也修复混合文件（有 polygon 也有 bbox）中的 bbox-only 行"
-    )
-    parser.add_argument(
-        "--no-clean-cache", action="store_true",
-        help="不删除 label 缓存"
-    )
-    parser.add_argument(
-        "--dry-run", action="store_true",
-        help="只检查不修改"
-    )
+    parser.add_argument("--no-clean-cache", action="store_true", help="不删除 label 缓存")
+    parser.add_argument("--dry-run", action="store_true", help="只检查不修改")
 
     args = parser.parse_args()
 
@@ -186,7 +169,7 @@ def main():
         if args.dry_run:
             count = 0
             for txt_file in label_dir.glob("*.txt"):
-                with open(txt_file, 'r', encoding='utf-8') as f:
+                with open(txt_file, encoding="utf-8") as f:
                     lines = [l.strip() for l in f if l.strip()]
                 if lines and not has_polygon_line(lines):
                     count += 1
