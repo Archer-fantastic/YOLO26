@@ -1,6 +1,6 @@
-import sys
-import os
 import argparse
+import os
+import sys
 
 project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 if project_root not in sys.path:
@@ -35,7 +35,9 @@ def parse_args():
     parser.add_argument("--cos-lr", dest="cos_lr", action="store_true", help="启用余弦学习率")
     parser.set_defaults(cos_lr=False)
     parser.add_argument("--close-mosaic", dest="close_mosaic", type=int, default=10, help="最后N轮关闭mosaic")
-    parser.add_argument("--no-close-mosaic", dest="close_mosaic", action="store_const", const=0, help="训练全程开启mosaic")
+    parser.add_argument(
+        "--no-close-mosaic", dest="close_mosaic", action="store_const", const=0, help="训练全程开启mosaic"
+    )
 
     parser.add_argument("--pretrained", dest="pretrained", action="store_true", help="启用pretrained")
     parser.add_argument("--no-pretrained", dest="pretrained", action="store_false", help="关闭pretrained")
