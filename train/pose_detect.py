@@ -1,28 +1,27 @@
-import cv2
+import argparse
 import os
 import sys
-import importlib
-import argparse
 from pathlib import Path
+
+import cv2
 
 # 强制从本项目加载 ultralytics (包含 Pose26 等自定义模块)
 _project_root = str(Path(__file__).resolve().parent.parent)
 sys.path.insert(0, _project_root)
 
 # 清除已缓存的 ultralytics 模块，确保从本地重新加载
-_cached = [k for k in sys.modules if k.startswith('ultralytics')]
+_cached = [k for k in sys.modules if k.startswith("ultralytics")]
 for _k in _cached:
     del sys.modules[_k]
 
 from ultralytics import YOLO
 
-
-VIDEO_EXTS = {'.mp4', '.avi', '.mov', '.mkv', '.wmv', '.flv', '.webm'}
-IMAGE_EXTS = {'.jpg', '.jpeg', '.png', '.bmp', '.tif', '.tiff', '.webp'}
+VIDEO_EXTS = {".mp4", ".avi", ".mov", ".mkv", ".wmv", ".flv", ".webm"}
+IMAGE_EXTS = {".jpg", ".jpeg", ".png", ".bmp", ".tif", ".tiff", ".webp"}
 
 
 def detect_video(model, video_path, output_path, conf=0.3):
-    """处理视频输入"""
+    """处理视频输入."""
     cap = cv2.VideoCapture(video_path)
     if not cap.isOpened():
         print(f"错误: 无法打开视频 {video_path}")
@@ -57,7 +56,7 @@ def detect_video(model, video_path, output_path, conf=0.3):
 
 
 def detect_image(model, image_path, output_path, conf=0.3):
-    """处理单张图片"""
+    """处理单张图片."""
     frame = cv2.imread(image_path)
     if frame is None:
         print(f"错误: 无法读取图片 {image_path}")
@@ -76,15 +75,15 @@ def detect_image(model, image_path, output_path, conf=0.3):
 
     annotated = r.plot(boxes=True, labels=True, kpt_radius=5, kpt_line=True, font_size=1.0)
 
-    os.makedirs(os.path.dirname(output_path) or '.', exist_ok=True)
+    os.makedirs(os.path.dirname(output_path) or ".", exist_ok=True)
     cv2.imwrite(output_path, annotated)
     print(f"图片处理完成: {output_path}")
 
 
 def detect_images(model, input_path, output_dir, conf=0.3):
-    """处理图片目录"""
+    """处理图片目录."""
     image_files = []
-    for p in Path(input_path).rglob('*'):
+    for p in Path(input_path).rglob("*"):
         if p.suffix.lower() in IMAGE_EXTS:
             image_files.append(p)
 
@@ -96,7 +95,7 @@ def detect_images(model, input_path, output_dir, conf=0.3):
 
     for i, img_path in enumerate(image_files):
         rel = img_path.relative_to(input_path)
-        dst = Path(output_dir) / rel.with_suffix('.jpg')
+        dst = Path(output_dir) / rel.with_suffix(".jpg")
         dst.parent.mkdir(parents=True, exist_ok=True)
 
         frame = cv2.imread(str(img_path))
@@ -115,7 +114,7 @@ def detect_images(model, input_path, output_dir, conf=0.3):
 
 def detect(model, input_path, output_path, conf=0.3):
     """
-    自动识别输入类型 (视频/图片/目录) 并进行关键点检测
+    自动识别输入类型 (视频/图片/目录) 并进行关键点检测.
 
     :param model: YOLO 模型
     :param input_path: 输入路径 (视频文件/图片文件/目录)
@@ -142,11 +141,11 @@ def detect(model, input_path, output_path, conf=0.3):
 
 # ---------------------- 运行关键点检测 ----------------------
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description='YOLO 关键点检测 (支持视频/图片/目录)')
-    parser.add_argument('--input', type=str, required=True, help='输入路径 (视频/图片/目录)')
-    parser.add_argument('--output', type=str, required=True, help='输出路径 (视频/图片/目录)')
-    parser.add_argument('--weights', type=str, default='yolo26n-pose.pt', help='模型权重路径')
-    parser.add_argument('--conf', type=float, default=0.3, help='置信度阈值')
+    parser = argparse.ArgumentParser(description="YOLO 关键点检测 (支持视频/图片/目录)")
+    parser.add_argument("--input", type=str, required=True, help="输入路径 (视频/图片/目录)")
+    parser.add_argument("--output", type=str, required=True, help="输出路径 (视频/图片/目录)")
+    parser.add_argument("--weights", type=str, default="yolo26n-pose.pt", help="模型权重路径")
+    parser.add_argument("--conf", type=float, default=0.3, help="置信度阈值")
     args = parser.parse_args()
 
     print(f"加载模型: {args.weights}")
